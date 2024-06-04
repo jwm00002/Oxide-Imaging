@@ -204,10 +204,10 @@ classdef XraySpecFunctions
             title("Spectra: "+map_shift+" eV")
             hold off
             %plot oxide maps
-            Nb2O5_avg = mean(og_shift(:,:,2),[1 2]);
-            NbO2_avg = mean(og_shift(:,:,3),[1 2]);
-            NbO_avg = mean(og_shift(:,:,4),[1 2]);
-            residual_avg = mean(og_shift(:,:,5),[1 2]);
+            Nb2O5_avg = mean(og_shift(:,:,3),[1 2]);
+            NbO2_avg = mean(og_shift(:,:,4),[1 2]);
+            NbO_avg = mean(og_shift(:,:,5),[1 2]);
+            residual_avg = mean(og_shift(:,:,6),[1 2]);
             oxideSum = Nb2O5_avg+NbO2_avg+NbO_avg;
             Nb2O5 = Nb2O5_avg*100/oxideSum;
             NbO2 = NbO2_avg*100/oxideSum;

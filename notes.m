@@ -4,8 +4,6 @@
 
 %try running with no NbO
 
-%create a github for this project to keep changes up to date for everybody?
-
 %open and normalize D4 sample data
 %{
 spot2 = XraySpecFunctions.readSpectraFile("D4_spot2_006.r");
