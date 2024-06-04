@@ -194,12 +194,13 @@ classdef XraySpecFunctions
             %plot spectra
             figure
             hold on
-            plot(energies,averages,'LineWidth',2)
-            plot(metal_ref_spectra(:,1),metal_ref_spectra(:,2),'LineWidth',2)
-            plot(NbSi2_ref_spectra(:,1),NbSi2_ref_spectra(:,2),'LineWidth',2)
-            plot(Nb2O5_ref_spectra(:,1),Nb2O5_ref_spectra(:,2),'LineWidth',2)
-            plot(NbO2_ref_spectra(:,1),NbO2_ref_spectra(:,2),'LineWidth',2)
-            plot(NbO_ref_spectra(:,1),NbO_ref_spectra(:,2),'LineWidth',2);
+            plot(energies,averages,'-o','LineWidth',2)
+            plot(metal_ref_array(:,1),metal_ref_array(:,2),'-o','LineWidth',2)
+            plot(NbSi2_ref_array(:,1),NbSi2_ref_array(:,2),'-o','LineWidth',2)
+            plot(Nb2O5_ref_array(:,1),Nb2O5_ref_array(:,2),'-o','LineWidth',2)
+            plot(NbO2_ref_array(:,1),NbO2_ref_array(:,2),'-o','LineWidth',2)
+            plot(NbO_ref_array(:,1),NbO_ref_array(:,2),'-o','LineWidth',2);
+            xlim([2350 2390])
             legend(sprintf('mapData: %g eV',map_shift),sprintf('metal: %g eV',metal_shift),sprintf('NbSi2: %g eV',NbSi2_shift),sprintf('Nb2O5: %g eV',Nb2O5_shift),sprintf('NbO2: %g eV',NbO2_shift),sprintf('NbO: %g eV',NbO_shift))
             title("Spectra: "+map_shift+" eV")
             hold off

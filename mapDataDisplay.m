@@ -2,7 +2,6 @@ clc;clear;close all;
 [mapData, energies]= XraySpecFunctions.loadAllMapData("D4 map data");
 mapData = XraySpecFunctions.noramalizeMaps(mapData);
 
-
 figure
 pcolor(mapData(:,:,1))
 colorbar
