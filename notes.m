@@ -1,8 +1,7 @@
-%check preedge and post edge difference and
-%compare first and second maps used for subtraction
-%and see if metal gets smaller in channels
-
-%try running with no NbO
+%pick three spots for each reference and pick in between each spot that is
+%closest to our expected percentages
+%weighted average for inbetween points
+%shift data first, then shift NbO and then shift NbO2
 
 %open and normalize D4 sample data
 %{

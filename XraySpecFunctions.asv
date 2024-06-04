@@ -82,7 +82,7 @@ classdef XraySpecFunctions
                         end
                         func = @(x) [pixelArray'-x(1).*metal_ref(:,2)-x(2).*NbSi2_ref(:,2)-x(3).*Nb2O5_ref(:,2)-x(4).*NbO2_ref(:,2)-x(5).*NbO_ref(:,2); 1-x(1)-x(2)-x(3)-x(4)-x(5)];
                         opts = optimoptions("lsqnonlin",'display','off');
-                        problem = createOptimProblem('lsqnonlin','x0',[0.75 0.25 0 0],'lb',[0 0 0 0],'ub',[1 1 1 1],'objective',func,'options',opts);
+                        problem = createOptimProblem('lsqnonlin','x0',[0 0 0 0 0],'lb',[0 0 0 0 0],'ub',[1 1 1 1 1],'objective',func,'options',opts);
                         %output step difference with everything else
                         [x, resnorm]= lsqnonlin(problem);
                         out(k,l,1) = x(1);
@@ -204,10 +204,10 @@ classdef XraySpecFunctions
             title("Spectra: "+map_shift+" eV")
             hold off
             %plot oxide maps
-            Nb2O5_avg = mean(og_shift(:,:,2),[1 2]);
-            NbO2_avg = mean(og_shift(:,:,3),[1 2]);
-            NbO_avg = mean(og_shift(:,:,4),[1 2]);
-            residual_avg = mean(og_shift(:,:,5),[1 2]);
+            Nb2O5_avg = mean(og_shift(:,:,3),[1 2]);
+            NbO2_avg = mean(og_shift(:,:,4),[1 2]);
+            NbO_avg = mean(og_shift(:,:,5),[1 2]);
+            residual_avg = mean(og_shift(:,:,6),[1 2]);
             oxideSum = Nb2O5_avg+NbO2_avg+NbO_avg;
             Nb2O5 = Nb2O5_avg*100/oxideSum;
             NbO2 = NbO2_avg*100/oxideSum;
@@ -234,21 +234,21 @@ classdef XraySpecFunctions
             c.Ruler.TickLabelFormat='%g%%';
             title("Nb2O5")
             subtitle(sprintf("Shift: %g eV      Percent of total oxide: %0.1f%%",Nb2O5_shift,Nb2O5))
-            subplot(2,3,3)
+            subplot(2,3,4)
             s = pcolor(og_shift(:,:,4).*100);
             s.FaceColor = 'interp';
             c = colorbar;  
             c.Ruler.TickLabelFormat='%g%%';
             title("NbO2")
             subtitle(sprintf("Shift: %g eV      Percent of total oxide: %0.1f%%",NbO2_shift,NbO2))
-            subplot(2,2,4)
+            subplot(2,3,5)
             s = pcolor(og_shift(:,:,5).*100);
             s.FaceColor = 'interp';
             c = colorbar;  
             c.Ruler.TickLabelFormat='%g%%';
             title("NbO")
             subtitle(sprintf("Shift: %g eV      Percent of total oxide: %0.1f%%",NbO_shift,NbO))
-            sgtitle("Oxide Maps: "+map_shift+" eV")
+            sgtitle("Percentages: "+map_shift+" eV")
             %plot residual map
             figure
             s = pcolor(og_shift(:,:,6));
@@ -275,8 +275,8 @@ classdef XraySpecFunctions
             s = pcolor(og_shift(:,:,3).*og_shift(:,:,7).*100);
             s.FaceColor = 'interp';
             colorbar;
-            title("NbSi2")
-            subtitle(sprintf("Shift: %g eV      Percent of total oxide: %0.1f%%",Nbsi2_shift,Nb2O5))
+            title("Nb2O5")
+            subtitle(sprintf("Shift: %g eV      Percent of total oxide: %0.1f%%",NbSi2_shift,Nb2O5))
             subplot(3,3,4)
             s = pcolor(og_shift(:,:,4).*og_shift(:,:,7).*100);
             s.FaceColor = 'interp';
@@ -289,7 +289,8 @@ classdef XraySpecFunctions
             colorbar;
             title("NbO")
             subtitle(sprintf("Shift: %g eV      Percent of total oxide: %0.1f%%",NbO_shift,NbO))
-            sgtitle("Oxide Maps: "+map_shift+" eV")
+            sgtitle("Percentage*Step Height: "+map_shift+" eV")
+            sgsubplot()
             subplot(3,3,6)
             s = pcolor(og_shift(:,:,7));
             s.FaceColor = 'interp';
