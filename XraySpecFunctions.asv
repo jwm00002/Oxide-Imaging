@@ -342,8 +342,8 @@ classdef XraySpecFunctions
             Nb2O5 = Nb2O5_avg*100/oxideSum;
             NbO2 = NbO2_avg*100/oxideSum;
             NbO = NbO_avg*100/oxideSum;
-            lowRegionAvg = (og_shift(38,44,1).*og_shift(38,44,7)+og_shift(45,28,1).*og_shift(45,28,7)+og_shift(48,66,1).*og_shift(48,66,7)+og_shift(55,53,1).*og_shift(55,53,7)+og_shift(56,35,1).*og_shift(56,35,7)+og_shift(78,71,1).*og_shift(78,71,7)+og_shift(78,58,1).*og_shift(78,58,7)+og_shift(78,32,1).*og_shift(78,32,7)+og_shift(78,19,1).*og_shift(78,19,7))/9;
-        end
+            lowRegionAvg = (og_shift(38,44,1).*og_shift(38,44,7)+og_shift(45,28,1).*og_shift(45,28,7)+og_shift(48,66,1).*og_shift(48,66,7)+og_shift(55,53,1).*og_shift(55,53,7)+og_shift(56,35,1).*og_shift(56,35,7)+og_shift(78,71,1).*og_shift(78,71,7)+og_shift(78,58,1).*og_shift(78,58,7)+og_shift(78,32,1).*og_shift(78,58,7)+og_shift(78,19,1).*og_shift(78,58,7))/9;
+        end.*og_shift(48,66,7)
         
         %mu = mean
         %sig = variance
