@@ -48,7 +48,7 @@ classdef XraySpecFunctions
         %i is the file number
         %j = 1 is the map data, j = 2 is the energy
         %k and l are the 2D array of map data
-        function [mapData, energies]= loadAllMapData(folderName)
+        function [mapData, energies]= loadAllMapData(folderName,mapType)
             %open the folder
             Files=dir(folderName);
             %skip the first two entires because they are . and ..
@@ -56,7 +56,7 @@ classdef XraySpecFunctions
                 %get the current file name
                 FileName=Files(k).name;
                 %read the data of that file
-                [data, energy] = XraySpecFunctions.readMapFile(FileName);
+                [data, energy] = XraySpecFunctions.readMapFile(FileName,mapType);
                 %write it output arrays
                 mapData(:,:,k-2) = data;
                 energies(k-2) = energy;
@@ -77,10 +77,10 @@ classdef XraySpecFunctions
                         stepDiff = mapData(k,l,18)-mapData(k,l,2);
                         %that the percentages should add up to that number
                         %create variables to solve for
-                        for i = 1:length(metal_ref)
+                        for i = 1:length(Nb2O5_ref)
                         pixelArray(i) = mapData(k,l,i);
                         end
-                        func = @(x) [pixelArray'-x(1).*metal_ref(:,2)-x(2).*NbSi2_ref(:,2)-x(3).*Nb2O5_ref(:,2)-x(4).*NbO2_ref(:,2)-x(5).*NbO_ref(:,2); 1-x(1)-x(2)-x(3)-x(4)-x(5)];
+                        func = @(x) [pixelArray'-x(1).*metal_ref(1:length(Nb2O5_ref),2)-x(2).*NbSi2_ref(:,2)-x(3).*Nb2O5_ref(:,2)-x(4).*NbO2_ref(:,2)-x(5).*NbO_ref(:,2); 1-x(1)-x(2)-x(3)-x(4)-x(5)];
                         opts = optimoptions("lsqnonlin",'display','off');
                         problem = createOptimProblem('lsqnonlin','x0',[0 0 0 0 0],'lb',[0 0 0 0 0],'ub',[1 1 1 1 1],'objective',func,'options',opts);
                         %output step difference with everything else
@@ -277,7 +277,7 @@ classdef XraySpecFunctions
             s.FaceColor = 'interp';
             colorbar;
             title("Nb2O5")
-            subtitle(sprintf("Shift: %g eV      Percent of total oxide: %0.1f%%",NbSi2_shift,Nb2O5))
+            subtitle(sprintf("Shift: %g eV      Percent of total oxide: %0.1f%%",Nb2O5_shift,Nb2O5))
             subplot(2,3,4)
             s = pcolor(og_shift(:,:,4).*og_shift(:,:,7));
             s.FaceColor = 'interp';
@@ -371,7 +371,7 @@ classdef XraySpecFunctions
         end
         
         %function to read intensity map data and energy level of file provided
-        function [data,energy] = readMapFile(fileName)
+        function [data,energy] = readMapFile(fileName,mapType)
             %open file in read mode
             file = fopen(fileName,'r');
             %read first 15 lines of header information and don't save it
@@ -401,7 +401,11 @@ classdef XraySpecFunctions
             %narrow the data down to just the chunk that is around 12000s
             %data = data(81:160,1:93);
             %narrow data to the 30s chunk
-            data = data(321:400,1:93);
+            if(strcmp(mapType,'D4'))
+                data = data(321:400,:);
+            elseif(strcmp(mapType,'GW'))
+                data = data(265:330,:);
+            end
             %close the file
             fclose(file);
         end
@@ -445,8 +449,8 @@ classdef XraySpecFunctions
 
         %finds energy, average, minimum, maximum, and standard deviation of
         %the 12000 chunk of the provided file and writes it to a text file
-        function statsOfData(fileName)
-            [data,energy] = XraySpecFunctions.readMapFile(fileName);
+        function statsOfData(fileName,mapType)
+            [data,energy] = XraySpecFunctions.readMapFile(fileName,mapType);
             data1 = data(81:160,1:93);
             avg = mean(data1,"all");
             minimum = min(data1,[],"all");
