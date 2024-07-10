@@ -1,48 +1,5 @@
 classdef XraySpecFunctions
     methods(Static)
-
-        function NbO_ref = NbO_curvefit()
-            h=3.5;
-            w=1.1;
-            x = 1:1:2400;
-            %create step function
-            s = 0.18*atan(x-2367.6)+0.27;
-            %s(1:1:205) = s(1:1:205)+1.59;
-            %create main gaussian
-            g1 = XraySpecFunctions.myGauss(x,2371.6,w,7/h);
-            %create smaller gaussian
-            g2 = XraySpecFunctions.myGauss(x,2374.2,2*w,3.2/h);
-            g3 = XraySpecFunctions.myGauss(x,2380.9,1.6*w,0.7/h);
-            g4 = XraySpecFunctions.myGauss(x,2387.8,w,0.5/h);
-            g5 = XraySpecFunctions.myGauss(x,2396,1.5*w,0.35/h);
-            NbO(2,:) = g1+g2+g3+g4+g5+s;
-            NbO(1,:) = x;
-            NbO = NbO';
-            NbO_ref(:,1) = NbO(2300:end,1);
-            NbO_ref(:,2) = NbO(2300:end,2);
-        end
-
-        function Nb_ref = Nb_curvefit()
-            %bring down amplitude to fit map averages better
-            x = 2310:2426;
-            %create step function
-            s = atan(x-2373);
-            s(1:64) = s(1:64)+1.59;
-            s(65:end) = s(65:end)-0.5;
-            s(64) = s(65);
-            %create main gaussian
-            g1 = XraySpecFunctions.myGauss(x,2370.5,2,3.4);
-            %create smaller gaussian
-            g2 = XraySpecFunctions.myGauss(x,2375,5,0.9);
-            %add everything together
-            Nb_ref(2,:) = g1+g2+s;
-            %apply slope to end
-            %Nb_ref(2,274:end) = Nb_ref(2,274:end).*y-0.73;
-            Nb_ref(1,:) = x;
-            %shift so that x axis is close to energy level
-            Nb_ref = Nb_ref';
-        end
-
         %mapData = array containing the data and energy of all map files
         %mapData(i,j,k,l)
         %i is the file number
@@ -63,14 +20,14 @@ classdef XraySpecFunctions
             end
         end
 
-        function [out, CI] = system_solver(mapData,metal_ref,Nb2O5_ref,NbO2_ref,NbO_ref)
+        function [out] = system_solver(mapData,metal_ref,Nb2O5_ref,NbO2_ref,NbO_ref)
             %mapData(k,l,i)
             %i is the file number
             %k and l are the 2D array of map data
                 cols = length(mapData(1,:,1));
                 rows = length(mapData(:,1,1));
                 out = zeros([rows cols 7]);
-                CI = zeros([rows cols 4 2]);
+                %CI = zeros([rows cols 4 2]);
                 %iterate pixel by pixel
                 for k = 1:1:rows
                     for l = 1:1:cols
@@ -82,25 +39,25 @@ classdef XraySpecFunctions
                         for i = 1:length(Nb2O5_ref)
                         pixelArray(i) = mapData(k,l,i);
                         end
-                        %{
-                        disp(length(metal_ref(2:18,2)))
-                        disp(length(NbSi2_ref))
-                        disp(length(Nb2O5_ref(2:18,2)))
-                        disp(length(NbO2_ref(2:18,2)))
-                        disp(length(NbO_ref(2:18,2)))
-                        %}
                         %arrays are not same length because of NbSi2 being
                         %shorter
-                        func = @(x) [pixelArray(2:18)'-x(1).*metal_ref(2:18,2)-x(2).*Nb2O5_ref(2:18,2)-x(3).*NbO2_ref(2:18,2)-x(4).*NbO_ref(2:18,2); 1-x(1)-x(2)-x(3)-x(4)];
+                        %{
+                        disp(size(pixelArray'))
+                        disp(size(metal_ref))
+                        disp(size(Nb2O5_ref))
+                        disp(size(NbO2_ref))
+                        disp(size(NbO_ref))
+                        %}
+                        func = @(x) [pixelArray'-x(1).*metal_ref(:,2)-x(2).*Nb2O5_ref(:,2)-x(3).*NbO2_ref(:,2)-x(4).*NbO_ref(:,2); 1-x(1)-x(2)-x(3)-x(4)];
                         opts = optimoptions("lsqnonlin",'display','off');
-                        problem = createOptimProblem('lsqnonlin','x0',[0 0 0 0],'lb',[0 0 0 0],'ub',[1 1 1 1],'objective',func,'options',opts);
+                        problem = createOptimProblem('lsqnonlin','objective',func,'x0',[0 0 0 0],'lb',[0 0 0 0],'ub',[1 1 1 1],'options',opts);
                         %output step difference with everything else
-                        [x, resnorm, residual,~,~,~,jacobian]= lsqnonlin(problem);
-                        CI(k,l,:,:) = nlparci(x,residual,'jacobian',jacobian);
-                        out(k,l,1) = x(1);
-                        out(k,l,2) = x(2);
-                        out(k,l,3) = x(3);
-                        out(k,l,4) = x(4);
+                        [y,resnorm,~,~,~,~,jacobian] = lsqnonlin(problem);
+                        %CI(k,l,:,:) = nlparci(x,residual,'jacobian',jacobian);
+                        out(k,l,1) = y(1);
+                        out(k,l,2) = y(2);
+                        out(k,l,3) = y(3);
+                        out(k,l,4) = y(4);
                         out(k,l,5) = resnorm;
                         out(k,l,6) = stepDiff;
                     end
@@ -111,6 +68,7 @@ classdef XraySpecFunctions
         %energies
         %ref = reference spectrum array containing energies and intensities
         function out = create_referenceArray(energies,ref)
+            out = [length(energies) 2];
             %iterate through mapData energy level
             for i = 1:length(energies)
                 %find the closest energy in the reference array
@@ -174,8 +132,6 @@ classdef XraySpecFunctions
                 metal_ref_spectra = metal_ref;
                 metal_ref_spectra(:,1) = metal_ref_spectra(:,1)+metal_shift;
             end
-            %NbSi2_ref_spectra = XraySpecFunctions.readSpectraFile(NbSi2_ref);
-            %NbSi2_ref_spectra(:,1) = NbSi2_ref_spectra(:,1)+NbSi2_shift;
             Nb2O5_ref_spectra = XraySpecFunctions.readSpectraFile(Nb2O5_ref);
             Nb2O5_ref_spectra(:,1) = Nb2O5_ref_spectra(:,1)+Nb2O5_shift;
             NbO2_ref_spectra = XraySpecFunctions.readSpectraFile(NbO2_ref);
@@ -186,7 +142,7 @@ classdef XraySpecFunctions
             %shift the energy of all maps
             mapEnergies(:) = mapEnergies(:)+map_shift;
             %normalize map data
-            mapData = XraySpecFunctions.normalizeMaps(mapData,mapType);
+            mapData = XraySpecFunctions.normalizeLower(mapData,mapType);
             %create array for each reference containing the intensity at shifted energy
             %levels
             disp("creating reference arrays")
@@ -197,7 +153,7 @@ classdef XraySpecFunctions
             NbO_ref_array = XraySpecFunctions.create_referenceArray(mapEnergies,NbO_ref_spectra);
             %solve system of equation function call and save to og_shift
             disp("solving equations")
-            [og_shift, CI] = XraySpecFunctions.system_solver(mapData,metal_ref_array,Nb2O5_ref_array,NbO2_ref_array,NbO_ref_array);
+            [og_shift] = XraySpecFunctions.system_solver(mapData,metal_ref_array,Nb2O5_ref_array,NbO2_ref_array,NbO_ref_array);
             for i = 1:length(mapEnergies)
                 averages(i) = mean(mapData(:,:,i),[1 2]);
                 energies(i) = mapEnergies(i);
@@ -344,14 +300,6 @@ classdef XraySpecFunctions
             lowRegionAvg = (og_shift(38,44,1).*og_shift(38,44,7)+og_shift(45,28,1).*og_shift(45,28,7)+og_shift(48,66,1).*og_shift(48,66,7)+og_shift(55,53,1).*og_shift(55,53,7)+og_shift(56,35,1).*og_shift(56,35,7)+og_shift(78,71,1).*og_shift(78,71,7)+og_shift(78,58,1).*og_shift(78,58,7)+og_shift(78,32,1).*og_shift(78,32,7)+og_shift(78,19,1).*og_shift(78,19,7))/9;
         end
         
-        %mu = mean
-        %sig = variance
-        %amp = amplitude
-        %x = x axis
-        function out = myGauss(x,mu,sig,amp)
-            out = amp*exp(-(((x-mu).^2)/(2*sig.^2)));
-        end
-        
         %function to read spectra and energy data from file provided
         %left column of data is energy and right column is spectra data
         function data = readSpectraFile(fileName)
@@ -415,44 +363,7 @@ classdef XraySpecFunctions
             %close the file
             fclose(file);
         end
-        
-        %function that calculates the average value for the entire file
-        function average = fileAverage(data)
-            total = 0;
-            %number of rows
-            rows = length(data(1,:));
-            %number of columns
-            cols = length(data(:,1));
-            %add all elements together
-            for i = 1:1:rows
-                for j = 1:1:cols
-                    total = total + data(i,j);
-                end
-            end
-            %calculate average of entire file
-            average = total/(rows*cols);
-        end
-        
-        %function that calculates the average of a spot given the coordinates of
-        %corners
-        %coordinates format is an array where the first number is the row position
-        %and the second number is the column position
-        %for example the first element in the first columnn would be [1,1]
-        function average = spotAverage(data,topLeftCorner,bottomLeftCorner,topRightCorner)
-            %verify coordinates are within bounds of array?
-            total = 0;
-            numElements = 0;
-            %add all elements together
-            for i = topLeftCorner(1):1:bottomLeftCorner(1)
-                for j = topLeftCorner(2):1:topRightCorner(2)
-                    total = total + data(i,j);
-                    numElements = numElements + 1;
-                end
-            end
-            %calculate average
-            average = total/(numElements);
-        end
-
+  
         %finds energy, average, minimum, maximum, and standard deviation of
         %the 12000 chunk of the provided file and writes it to a text file
         function statsOfData(fileName)
@@ -494,6 +405,36 @@ classdef XraySpecFunctions
             %multiply all maps by 1/lastAvg
             %loop until last average is 1?
             mapData(:,:,1:len) = mapData(:,:,1:len).*(1/lastAvg);
+            mapDataOut = mapData;
+        end
+
+        function mapDataOut = normalizeLower(mapData,mapType)
+            len = size(mapData,3);
+            firstAvg = mean(mapData(:,:,1),[1 2]);
+            %loop until first avg is 0
+            while round(firstAvg) ~= 0
+                %subtract first avg from everything
+                mapData(:,:,1:len) = mapData(:,:,1:len)-firstAvg;
+                %recalculate first avg
+                firstAvg = mean(mapData(:,:,1),[1 2]);
+            end
+            %find average of last map
+            %adjust last average so that we only average the section is
+            %metal
+            if(strcmp(mapType,"D4"))
+                lastAvg = mean(mapData(1:30,:,len),[1 2]);
+            else
+                lastAvg = mean(mapData(:,:,len),[1 2]);
+            end
+            %multiply all maps by 1/lastAvg
+            %loop until last average is 1?
+            mapData(:,:,1:len) = mapData(:,:,1:len).*(1/lastAvg);
+            for i = 1:len
+                Avg = mean(mapData(:,:,i),[1 2]);
+                if(Avg > 1)
+                mapData(:,:,i) = 1+(mapData(:,:,i)-1)*0.5;
+                end
+            end
             mapDataOut = mapData;
         end
     end

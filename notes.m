@@ -1,12 +1,19 @@
+%goal is not to quantify the oxides but to locate them
+%other methods are better at quantifying
+
+%look into switching lsqnonlin into a linear optimization
+
 %focus on uncertainty
-%if mapData average is above  subtract 1 multiply by 1/2 and then add back
-%the one
-%send Femi map average plot
+%function outputs residual, residual squared ,and jacobian
 
-%future work
 %processed and unproccessed maps
-%take weighted averages to find the 18 pointso nthe unprocessed
+%take weighted averages to find the 18 points on the unprocessed
 %subtract processed from unprocessed
-
 %add a folder to map folders that holds the spectrum of that sample to
 %automate above process for all maps
+
+%subtract out the metal reference from the signal and then fit?
+
+%update comments on the code
+%2 page write up of project progress
+%create a read me document
