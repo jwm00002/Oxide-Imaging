@@ -2,6 +2,8 @@
 %other methods are better at quantifying
 
 %look into switching lsqnonlin into a linear optimization
+%tried using as system of equation solver and does not work because system
+%is not consistent
 
 %focus on uncertainty
 %function outputs residual, residual squared ,and jacobian
@@ -14,6 +16,5 @@
 
 %subtract out the metal reference from the signal and then fit?
 
-%update comments on the code
 %2 page write up of project progress
 %create a read me document
