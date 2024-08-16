@@ -16,5 +16,11 @@
 
 %subtract out the metal reference from the signal and then fit?
 
-%2 page write up of project progress
+%derivatives not used in spectroscopy but might be useful for finding small
+%amounts like we are
+
+%is there a way to fit the shape without caring about intensities
+
+%rework percents so that they make sense with no bounds
+
 %create a read me document

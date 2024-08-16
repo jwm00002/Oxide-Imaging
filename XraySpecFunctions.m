@@ -38,15 +38,21 @@ classdef XraySpecFunctions
                         %use length(Nb2O5_ref) to make sure references are
                         %all the same length
                         pixelArray(1:length(Nb2O5_ref)) = mapData(k,l,1:length(Nb2O5_ref));
-                        %{
+                        
                         %used to check if the references are the same
-                        length
+                        %length
+                        %{
                         disp(size(pixelArray'))
                         disp(size(metal_ref))
                         disp(size(Nb2O5_ref))
                         disp(size(NbO2_ref))
                         disp(size(NbO_ref))
+                        disp(size([metal_ref,Nb2O5_ref,NbO2_ref,NbO_ref]))
+                        
+                        y = [metal_ref(:,2),Nb2O5_ref(:,2),NbO2_ref(:,2),NbO_ref(:,2)]\pixelArray';
+                        resnorm = mean(pixelArray'-y(1).*metal_ref(:,2)-y(2).*Nb2O5_ref(:,2)-y(3).*NbO2_ref(:,2)-y(4).*NbO_ref(:,2)).^2;
                         %}
+                        
                         %create the function to minimize
                         func = @(x) [pixelArray'-x(1).*metal_ref(:,2)-x(2).*Nb2O5_ref(:,2)-x(3).*NbO2_ref(:,2)-x(4).*NbO_ref(:,2); 1-x(1)-x(2)-x(3)-x(4)];
                         opts = optimoptions("lsqnonlin",'display','off');
@@ -55,6 +61,7 @@ classdef XraySpecFunctions
                         %solve the problem
                         [y,resnorm,~,~,~,~,jacobian] = lsqnonlin(problem);
                         %CI(k,l,:,:) = nlparci(x,residual,'jacobian',jacobian);
+                        
                         %save data to output
                         out(k,l,1) = y(1);
                         out(k,l,2) = y(2);
